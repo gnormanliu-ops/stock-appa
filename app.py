@@ -69,12 +69,14 @@ def download_data(tickers_str, start, end):
                 failed.append(t)
                 continue
 
-            # handle MultiIndex columns from newer yfinance versions
+            # flatten MultiIndex columns
             if isinstance(raw.columns, pd.MultiIndex):
-                raw.columns = raw.columns.get_level_values(0)
+                raw.columns = [col[0] for col in raw.columns]
 
             if "Close" in raw.columns:
-                prices[t] = raw["Close"]
+                prices[t] = raw["Close"].dropna()
+            elif "Adj Close" in raw.columns:
+                prices[t] = raw["Adj Close"].dropna()
             else:
                 failed.append(t)
 
